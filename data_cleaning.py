@@ -29,6 +29,9 @@ data['Channel Title'] = data['Channel Title'].str.replace('®', '', regex=False)
 # Tokenize text in the Message column
 data['Tokens'] = data['Message'].apply(lambda x: word_tokenize(x) if isinstance(x, str) else [])
 
+# Remove rows where the 'Message' column is "Unknown"
+data = data[data['Message'] != 'Unknown']
+
 # Save cleaned data
 data.to_csv("cleaned_data.csv", index=False)
 
