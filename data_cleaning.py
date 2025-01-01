@@ -23,6 +23,9 @@ data['Message'] = data['Message'].str.replace(r'[^\w\s]', '', regex=True)
 # Special cleaning for the `channel_title` column (remove symbols like 📱 for Phone hub📱)
 data['Channel Title'] = data['Channel Title'].str.replace("📱", "", regex=False)
 
+# Remove the ® symbol from the 'channel_title' column
+data['Channel Title'] = data['Channel Title'].str.replace('®', '', regex=False)
+
 # Tokenize text in the Message column
 data['Tokens'] = data['Message'].apply(lambda x: word_tokenize(x) if isinstance(x, str) else [])
 
