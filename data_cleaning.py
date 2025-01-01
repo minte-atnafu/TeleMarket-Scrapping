@@ -17,10 +17,13 @@ data.drop_duplicates(inplace=True)
 # Normalize text (e.g., Amharic)
 data['Message'] = data['Message'].apply(lambda x: unidecode(x) if isinstance(x, str) else x)
 
-# Remove unwanted symbols
+# Remove unwanted symbols in the Message column
 data['Message'] = data['Message'].str.replace(r'[^\w\s]', '', regex=True)
 
-# Tokenize text
+# Special cleaning for the `channel_title` column (remove symbols like 📱 for Phone hub📱)
+data['Channel Title'] = data['Channel Title'].str.replace("📱", "", regex=False)
+
+# Tokenize text in the Message column
 data['Tokens'] = data['Message'].apply(lambda x: word_tokenize(x) if isinstance(x, str) else [])
 
 # Save cleaned data
