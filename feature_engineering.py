@@ -42,34 +42,41 @@ def process_phone_hub(messages):
 def process_sami_tech(messages):
     features = []
     for message in messages:
-        # Extract product specifications (excluding Price and Phone Numbers)
-        specs = re.search(r"(New arrival|Brand New|[A-Za-z0-9\s]+(?:\s(?:INTEL|AMD|NVIDIA|16GB|1TB|SSD|RAM|Processor|Full HD|144hz|i7|i5|Core|GeForce|GTX|Nvidia))*(?:\s*.*\s*)*)", message, re.IGNORECASE)
-        
-        # Remove any price and phone number information from the specifications
-        if specs:
-            specs_info = specs.group(0).strip()
-            # Remove price and phone numbers from the specs information
-            specs_info = re.sub(r"PRICE\s[\d,]+\s*birr", "", specs_info)
-            specs_info = re.sub(r"\b\d{9,10}\b", "", specs_info)  # Remove phone numbers
+        # Debugging: Print the message being processed
+        print(f"Processing message: {message}")
+
+        # Extract price (ensure it follows "PRICE") and append "birr"
+        price_match = re.search(r"PRICE\s+([\d,]+)", message, re.IGNORECASE)
+        if price_match:
+            price_info = price_match.group(1).replace(",", "") + " birr"
+            # Remove the price from the message
+            message = re.sub(r"PRICE\s+[\d,]+", "", message, flags=re.IGNORECASE)
         else:
-            specs_info = None
-        
-        # Extract price and add 'birr'
-        price = re.search(r"PRICE\s([\d,]+)\s*birr", message)
-        
+            price_info = None
+
+        # Remove leading/trailing spaces after modification
+        message = message.strip()
+
         # Extract phone numbers
         phone_numbers = re.findall(r"\b\d{9,10}\b", message)
-        
-        # Format price and phone numbers
-        price_info = price.group(1) + " birr" if price else None
         phone_numbers_info = ", ".join(phone_numbers) if phone_numbers else None
-        
+
+        # Remove phone numbers from the message
+        message = re.sub(r"\b\d{9,10}\b", "", message).strip()
+
+        # Debugging: Print cleaned specifications
+        print(f"Cleaned message: {message}")
+
         features.append({
-            "Specifications": specs_info,  # Contains only specifications without price or phone numbers
-            "Price": price_info,           # Contains the price
-            "Phone Numbers": phone_numbers_info,  # Contains phone numbers
+            "Specifications": message,  # Remaining text after removing price and phone numbers
+            "Price": price_info,
+            "Phone Numbers": phone_numbers_info,
         })
+
     return pd.DataFrame(features)
+
+
+
 
 # Filter data by channel and apply feature engineering
 ethio_brand_data = data[data['Channel Title'] == 'EthioBrand']
