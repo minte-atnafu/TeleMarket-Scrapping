@@ -1,28 +1,34 @@
 import pandas as pd
 import re
-from text_unidecode import unidecode
 
-# Load the data
-data = pd.read_csv("combined_features.csv")  # Make sure to load the correct file
-
-# Data Cleaning Function
+# Function to clean unwanted text
 def remove_unwanted_text(text):
     if isinstance(text, str):
-        # Refined regex pattern for variations
-        pattern = r"(price|birr|call)\s*sww2844\s*(\n|\s)*httpstmesamcomptech"
-        cleaned_text = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
+        # Refined regex to specifically target the unwanted text
+        patterns = [
+            r"Price\s*sww2844\s*Call\s*httpstmesamcomptech",  # First unwanted pattern
+            r"birr\s*sww2844\s*httpstmesamcomptech"          # New unwanted pattern
+        ]
+        for pattern in patterns:
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
         
-        # Clean up extra whitespace
-        cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+        # Remove any extra whitespace after cleaning
+        text = re.sub(r'\s+', ' ', text).strip()
 
-        return cleaned_text
+        return text
     return text
 
-# Apply cleaning function to 'specification' column where 'Channel Title' is 'Sami Tech'
-data.loc[data['Channel Title'] == 'Sami Tech', 'Specifications'] = \
-    data.loc[data['Channel Title'] == 'Sami Tech', 'Specifications'].apply(remove_unwanted_text)
 
-# Save cleaned data
+# Load the data
+data = pd.read_csv("combined_features.csv")  # Adjust the file name if necessary
+
+# Apply cleaning function only to rows with 'Channel Title' == 'Sami Tech'
+data.loc[data['Channel Title'] == 'Sami Tech', 'Specifications'] = (
+    data.loc[data['Channel Title'] == 'Sami Tech', 'Specifications']
+    .apply(remove_unwanted_text)
+)
+
+# Save cleaned data to a new CSV file
 data.to_csv("cleaned_featured_data.csv", index=False)
 
-print("Data cleaning complete! Cleaned data saved to cleaned_featured_data.csv.")
+print("Unwanted text removed for 'Sami Tech'! Cleaned data saved to cleaned_feature_engineered_data.csv.")
